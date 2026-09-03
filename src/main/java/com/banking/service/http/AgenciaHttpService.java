@@ -33,4 +33,18 @@ public class AgenciaHttpService {
 		}
 	}
 
+	public Agencia buscarPorId(Integer id) {
+		return agencias.stream().
+			filter(agencia -> agencia.getId().equals(id)).toList().getFirst();
+	}
+
+	public void deletar(Integer id) {
+		agencias.removeIf(agencia -> agencia.getId().equals(id));
+	}
+
+	public void alterar(Agencia agencia) {
+		deletar(agencia.getId());
+		cadastrar(agencia);
+	}
+
 }
