@@ -1,13 +1,11 @@
 package com.banking.service.http;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import com.banking.domain.entity.Agencia;
 import com.banking.domain.enums.SituacaoCadastral;
 import com.banking.domain.http.AgenciaHttp;
+import com.banking.domain.repository.AgenciaRepository;
 import com.banking.exceptions.AgenciaNaoAtivaOuNaoEncontradaException;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,7 +16,11 @@ public class AgenciaHttpService {
 	@RestClient
 	private SituacaoCadastralHttpService situacaoCadastralHttpService;
 
-	private List<Agencia> agencias = new ArrayList<>();
+	private final AgenciaRepository agenciaRepository;
+
+	AgenciaHttpService(AgenciaRepository agenciaRepository) {
+		this.agenciaRepository = agenciaRepository;
+	}
 
 	public void cadastrar(Agencia agencia) {
 		AgenciaHttp agenciaHttp = situacaoCadastralHttpService.buscarPorCnpj(agencia.getCnpj());
@@ -27,24 +29,25 @@ public class AgenciaHttpService {
 			agenciaHttp != null && 
 			agenciaHttp.getSituacaoCadastral().equals(SituacaoCadastral.ATIVO)
 		) {
-			agencias.add(agencia);
+			this.agenciaRepository.persist(agencia);
 		} else {
 			throw new AgenciaNaoAtivaOuNaoEncontradaException();
 		}
 	}
 
-	public Agencia buscarPorId(Integer id) {
-		return agencias.stream().
-			filter(agencia -> agencia.getId().equals(id)).toList().getFirst();
+	public Agencia buscarPorId(Long id) {
+		return this.agenciaRepository.findById(id);
 	}
 
-	public void deletar(Integer id) {
-		agencias.removeIf(agencia -> agencia.getId().equals(id));
+	public void deletar(Long id) {
+		this.agenciaRepository.deleteById(id);;
 	}
 
 	public void alterar(Agencia agencia) {
-		deletar(agencia.getId());
-		cadastrar(agencia);
+		this.agenciaRepository.update(
+			"nome = ?1, razaoSocial = ?2, cnpj = ?3 where id = ?4",
+			agencia.getNome(), agencia.getRazaoSocial(), agencia.getCnpj(), agencia.getId()
+		);
 	}
 
 }
