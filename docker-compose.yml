@@ -6,24 +6,27 @@ services:
     image: banking-service:latest
     container_name: banking-service-container
     environment:
-      - QUARKUS_DATASOURCE_USERNAME=eduardo
-      - QUARKUS_DATASOURCE_PASSWORD=eduardo
-      - QUARKUS_DATASOURCE_HOST=postgres-db-alura
-      - QUARKUS_DATASOURCE_PORT=5432
+      QUARKUS_HTTP_PORT: ${QUARKUS_HTTP_PORT:-8181}
+      QUARKUS_DATASOURCE_USERNAME: ${QUARKUS_DATASOURCE_USERNAME:-eduardo}
+      QUARKUS_DATASOURCE_PASSWORD: ${QUARKUS_DATASOURCE_PASSWORD:-eduardo}
+      QUARKUS_DATASOURCE_HOST: ${QUARKUS_DATASOURCE_HOST:-postgres-db}
+      QUARKUS_DATASOURCE_PORT: ${QUARKUS_DATASOURCE_PORT:-5432}
+      QUARKUS_DATASOURCE_DATABASE: ${QUARKUS_DATASOURCE_DATABASE:-agencia}
+      SITUACAO_CADASTRAL_API_URL: ${SITUACAO_CADASTRAL_API_URL:-http://localhost:8181}
     ports:
-      - 8181:8181
+      - "${QUARKUS_HTTP_PORT:-8181}:${QUARKUS_HTTP_PORT:-8181}"
     depends_on:
-      - postgres-db-alura
+      - postgres-db
 
-  postgres-db-alura:
+  postgres-db:
     image: postgres:14
-    container_name: postgres-db-alura-container
+    container_name: postgres-db-container
     environment:
-      - POSTGRES_USER=eduardo
-      - POSTGRES_PASSWORD=eduardo
-      - POSTGRES_DB=agencia
+      POSTGRES_USER: ${QUARKUS_DATASOURCE_USERNAME:-eduardo}
+      POSTGRES_PASSWORD: ${QUARKUS_DATASOURCE_PASSWORD:-eduardo}
+      POSTGRES_DB: ${QUARKUS_DATASOURCE_DATABASE:-agencia}
     ports:
-      - 5432:5432
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
