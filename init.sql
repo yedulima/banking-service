@@ -13,3 +13,13 @@ create table if not exists agencia(
     cnpj varchar(18) not null,
     endereco_id integer not null unique references endereco(id)
 );
+
+insert into endereco (id, rua, logradouro, complemento, numero) values
+    (1, 'Rua das Flores', 'Centro', 'Sala 101', 100),
+    (2, 'Avenida Brasil', 'Jardins', 'Andar 8', 2500)
+on conflict (id) do nothing;
+
+insert into agencia (id, nome, razao_social, cnpj, endereco_id) values
+    (1, 'Agencia Centro', 'Agencia Centro LTDA', '04252011000110', 1),
+    (2, 'Agencia Jardins', 'Agencia Jardins LTDA', '40688134000161', 2)
+on conflict (id) do nothing;
